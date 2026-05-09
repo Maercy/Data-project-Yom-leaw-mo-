@@ -1,6 +1,7 @@
-printf "hello world";
-return 0;
-printf 'hiiiii'
-return 0;
+#include <stdio.h>
 
+int main() {
+    printf("Hello, yayyy!\n");
+    return 0;
+}
 
