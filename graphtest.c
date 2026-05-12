@@ -6,6 +6,8 @@
 #define MAX_PLACE 100
 #define INF 9999
 
+// ================= STRUCT =================
+
 struct Area {
     int id;
     char name[50];
