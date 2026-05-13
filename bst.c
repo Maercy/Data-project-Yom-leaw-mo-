@@ -89,6 +89,7 @@ int main() {
 
     Booking* found = searchHistory(root, 102);
 
+
     if (found != NULL) {
         printf("Booking Found!\n");
         printf("Customer: %s\n", found->customerName);
