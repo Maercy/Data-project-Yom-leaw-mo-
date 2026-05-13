@@ -1,3 +1,4 @@
+//เหลือเเก้ค่าในกราฟให้เชื่อมกัน
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
