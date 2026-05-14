@@ -491,18 +491,22 @@ int main() {
             dequeue(&queues[b-1]);
             
         } else if (choice == 3) {
-            for(int i=0; i<BRANCH_COUNT; i++) {
-                printf("\n--- %s Queue ---", branchNames[i]);
-                QueueNode *curr = queues[i].front;
-                if(!curr) printf(" Empty");
-                while(curr) {
-                    printf("\n [%s] %s -> %s", curr->data.queueCode, curr->data.name, curr->data.restaurantName);
-                    curr = curr->next;
-                }
-                printf("\n");
+    for(int i=0; i<BRANCH_COUNT; i++) {
+        printf("\n--- %s Queue ---\n", branchNames[i]);  // ADDED \n
+        QueueNode *curr = queues[i].front;
+        int count = 0;
+        if(!curr) {
+            printf(" Empty\n");  // ADDED \n
+        } else {
+            while(curr) {
+                count++;
+                printf(" [%s] %s -> %s\n", curr->data.queueCode, curr->data.name, curr->data.restaurantName);
+                curr = curr->next;
             }
+            printf(" Total: %d customer(s)\n", count);  // ADDED count
         }
-    } while (choice != 0);
+    }
+} while (choice != 0);
 
     return 0;
 }
