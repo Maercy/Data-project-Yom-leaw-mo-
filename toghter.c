@@ -446,29 +446,6 @@ int main() {
         printf("Select: "); scanf("%d", &choice);
 
         if (choice == 1) {
-            /*
-            printf("\n--- Select Area ---\n");
-            for(int i=0; i<areaCount; i++) printf("%d. %s\n", areas[i].id, areas[i].name);
-            int a; scanf("%d", &a);
-
-            printf("\n--- Select Building ---\n");
-            for(int i=0; i<subnodeCount; i++) 
-                if(subnodes[i].area_id == a) printf("%d. %s\n", subnodes[i].id, subnodes[i].name);
-            int s; scanf("%d", &s);
-
-            printf("\n--- Select Current Place ID ---\n");
-            for(int i=0; i<placeCount; i++) 
-                if(places[i].subnode_id == s) printf("[%d] %s\n", places[i].id, places[i].place_name);
-            int start; scanf("%d", &start);
-
-            printf("\n--- Select Target Restaurant ID ---\n");
-            for(int i=0; i<placeCount; i++) 
-                if(places[i].subnode_id == s && places[i].isRestaurant) 
-                    printf("[%d] %s\n", places[i].id, places[i].restaurant.restaurant_name);
-            int dest; scanf("%d", &dest);
-
-            processBooking(start, dest);
-            */
             showAreas();
             int area = selectArea();
 
@@ -491,22 +468,25 @@ int main() {
             dequeue(&queues[b-1]);
             
         } else if (choice == 3) {
-    for(int i=0; i<BRANCH_COUNT; i++) {
-        printf("\n--- %s Queue ---\n", branchNames[i]);  // ADDED \n
-        QueueNode *curr = queues[i].front;
-        int count = 0;
-        if(!curr) {
-            printf(" Empty\n");  // ADDED \n
-        } else {
-            while(curr) {
-                count++;
-                printf(" [%s] %s -> %s\n", curr->data.queueCode, curr->data.name, curr->data.restaurantName);
-                curr = curr->next;
+            for(int i=0; i<BRANCH_COUNT; i++) {
+                printf("\n--- %s Queue ---\n", branchNames[i]);  // FIXED: Added \n
+                QueueNode *curr = queues[i].front;
+                int count = 0;
+                if(!curr) {
+                    printf(" Empty\n");
+                } else {
+                    while(curr) {
+                        count++;
+                        printf(" [%s] %s -> %s\n", curr->data.queueCode, curr->data.name, curr->data.restaurantName);
+                        curr = curr->next;
+                    }
+                    printf(" Total: %d customer(s)\n", count);
+                }
             }
-            printf(" Total: %d customer(s)\n", count);  // ADDED count
         }
-    }
-} while (choice != 0);
+    } while (choice != 0);
 
     return 0;
 }
+
+

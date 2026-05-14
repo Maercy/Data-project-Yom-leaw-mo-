@@ -1,4 +1,3 @@
-//เดิมถ้า path not found ต้องกลับมาที่หน้าเเรก
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +9,7 @@
 #define INF 9999
 
 // ================= STRUCT (โครงสร้างข้อมูล) =================
+
 // --- ระบบ BST (History) สำหรับเก็บประวัติ ---
 struct Booking {
     int bookingID;
@@ -19,7 +19,6 @@ struct Booking {
     struct Booking* right;
 };
 typedef struct Booking Booking;
-
 
 // QUEUE (gain) 
 #define BRANCH_COUNT 3
@@ -50,7 +49,7 @@ typedef struct {
     int totalBooked;
 } Queue;
 
-//  ระบบ GRAPH (Cream) 
+// ระบบ GRAPH (Cream) 
 struct Area { 
     int id; 
     char name[50]; 
@@ -88,7 +87,9 @@ int subnodeCount = 0;
 int placeCount = 0;
 int graph[MAX_PLACE][MAX_PLACE];
 int nextBookingID = 1001;
+
 // ================= BST FUNCTIONS (ประวัติการจอง) =================
+
 Booking* createBookingNode(int id, char name[], int table) {
     Booking* newNode = (Booking*)malloc(sizeof(Booking));
     newNode->bookingID = id;
@@ -114,9 +115,11 @@ Booking* searchHistory(Booking* root, int id) {
 void displayHistory(Booking* root) {
     if (root == NULL) return;
     displayHistory(root->left);
-    printf("ID: %d | Name: %s | Table: %d\n", root->bookingID, root->customerName, root->tableNumber);
+    printf("Booking ID: %d | Name: %s | Table: %d\n", root->bookingID, root->customerName, root->tableNumber);
+    printf("----------------------------------------\n");
     displayHistory(root->right);
 }
+
 // ================= QUEUE FUNCTIONS (ระบบคิว) =================
 
 void initQueue(Queue *q, int branchID) {
@@ -151,13 +154,13 @@ void dequeue(Queue *q) {
         return;
     }
     QueueNode *temp = q->front;
-    *int tableNum = (rand() % 20) + 1; // สุ่มเลขโต๊ะ 1-20 ทำไม
+    int tableNum = (rand() % 20) + 1; // สุ่มเลขโต๊ะให้ลูกค้า
 
-    printf("\n[SERVED] %s (%s) is now seated at Table %d.\n", temp->data.name, temp->data.queueCode, tableNum);
+    printf("\n[SERVED] %s (%s) is now being seated at Table %d.\n", temp->data.name, temp->data.queueCode, tableNum);
     
     // --- LINK: ส่งข้อมูลจาก Queue ไปยัง BST History ---
     historyRoot = insertHistory(historyRoot, temp->data.bookingID, temp->data.name, tableNum);
-    printf("[SYSTEM] Data moved to History BST (ID: %d)\n", temp->data.bookingID);
+    printf("[SYSTEM] Booking history updated for ID: %d\n", temp->data.bookingID);
 
     q->front = q->front->next;
     if (q->front == NULL) q->rear = NULL;
@@ -196,14 +199,14 @@ void connectPlaces(int from, int to, int dist) {
 }
 
 void showAreas() {
-    printf("\n===== AREAS  =====\n");
+    printf("\n===== AREAS =====\n");
     for(int i = 0; i < areaCount; i++) {
         printf("%d. %s\n", areas[i].id, areas[i].name);
     }
 }
 
 void showSubNodes(int area_id) {
-    printf("\n===== SUB LOCATIONS  =====\n");
+    printf("\n===== SUB LOCATIONS =====\n");
     for(int i = 0; i < subnodeCount; i++) {
         if(subnodes[i].area_id == area_id) {
             printf("%d. %s\n", subnodes[i].id, subnodes[i].name);
@@ -221,7 +224,7 @@ void showPlaces(int subnode_id) {
 }
 
 void showRestaurants(int subnode_id) {
-    printf("\n===== RESTAURANTS  =====\n");
+    printf("\n===== RESTAURANTS =====\n");
     for(int i = 0; i < placeCount; i++) {
         if(places[i].subnode_id == subnode_id && places[i].isRestaurant == 1) {
             printf("%d. %s\n", places[i].id, places[i].restaurant.restaurant_name);
@@ -258,7 +261,6 @@ int selectRestaurant() {
     scanf("%d", &restaurant);
     return restaurant;
 }
-
 
 void findShortestPath(int start, int destination) {
     int distance[MAX_PLACE], visited[MAX_PLACE], parent[MAX_PLACE];
@@ -300,7 +302,6 @@ void findShortestPath(int start, int destination) {
     printf("START FROM: %s\n", places[start].place_name);
     printf("----------------------------------------\n");
 
-    // ปริ้นท์เส้นทางไล่ลำดับ Step จากเริ่มไปจบ
     for (int i = path_count - 1; i >= 0; i--) {
         int nodeId = path[i];
         printf("Step %d: %s", (path_count - i), places[nodeId].place_name);
@@ -316,23 +317,24 @@ void findShortestPath(int start, int destination) {
     printf("----------------------------------------\n");
     printf("TOTAL DISTANCE : %d units\n", distance[destination]);
     printf("========================================\n");
-}.
+}
 
 // ================= INTEGRATION (ส่วนเชื่อมต่อ) =================
 
 void processBooking(int startID, int destID) {
     Customer c;
-    c.bookingID = nextBookingID++;
-
-    // 1. นำทางหาเส้นทางใกล้ที่สุดก่อน Dijkstra
+    
+    // 1. นำทางหาเส้นทางใกล้ที่สุดก่อน
     findShortestPath(startID, destID);
-    //2 .กรอกข้อมูล
-    printf("\n--- Customer Registration ---\n");
+
+    // 2. กรอกข้อมูลลูกค้า
+    printf("\n--- Step: Registration ---\n");
+    c.bookingID = nextBookingID++; // ลิ้งค์ ID อัตโนมัติ
     printf("Enter Name: "); scanf("%s", c.name);
     printf("Enter Phone: "); scanf("%s", c.phone);
     printf("Party Size: "); scanf("%d", &c.partySize);
 
-    // 3.ดึงข้อมูลจาก Graph มาลงตัวแปร Customer
+    // 3. ดึงข้อมูลจาก Graph มาลงตัวแปร Customer
     int subID = places[destID].subnode_id;
     int areaID = -1;
     for(int i = 0; i < subnodeCount; i++) {
@@ -345,7 +347,6 @@ void processBooking(int startID, int destID) {
     c.branchID = areaID;
     strcpy(c.restaurantName, places[destID].restaurant.restaurant_name);
 
-    
     // 4. จองคิวด้วย Queue
     enqueue(&queues[areaID - 1], c);
 }
@@ -355,17 +356,15 @@ void processBooking(int startID, int destID) {
 int main() {
     SetConsoleOutputCP(65001);
     
-    // ล้างค่าคิวและกราฟ
     for (int i = 0; i < BRANCH_COUNT; i++) initQueue(&queues[i], i + 1);
     for (int i = 0; i < MAX_PLACE; i++) 
         for (int j = 0; j < MAX_PLACE; j++) graph[i][j] = 0;
 
-    // --- ข้อมูล Area ---
+    // --- SEED DATA ---
     addArea(1, "Siam");
     addArea(2, "Ari");
     addArea(3, "Pharram2");
 
-    // --- ข้อมูล Building ---
     addSubNode(1, 1, "MBK");
     addSubNode(2, 1, "PARAGON");
     addSubNode(3, 2, "BTS Ari");
@@ -373,9 +372,7 @@ int main() {
     addSubNode(5, 3, "Bangmod");
     addSubNode(6, 3, "Central Pharam2");
 
-    // --- ข้อมูล Places & Connections ---
-
-    // SIAM - MBK (SubNode 1)
+    // SIAM - MBK
     addPlace(0, 1, "Entrance", 0, 0, "");
     addPlace(1, 1, "Escalator", 0, 0, "");
     addPlace(2, 1, "classroom tutor", 0, 0, "");
@@ -385,15 +382,12 @@ int main() {
     addPlace(6, 1, "FoodCourt", 0, 0, "");
     addPlace(7, 1, "Bonchon", 1, 1003, "Bonchon");
 
-    connectPlaces(0, 1, 2);
-    connectPlaces(1, 2, 1);
-    connectPlaces(1, 3, 3);
-    connectPlaces(1, 6, 4);
-    connectPlaces(6, 4, 2);
-    connectPlaces(6, 5, 2);
+    connectPlaces(0, 1, 2); connectPlaces(1, 2, 1);
+    connectPlaces(1, 3, 3); connectPlaces(1, 6, 4);
+    connectPlaces(6, 4, 2); connectPlaces(6, 5, 2);
     connectPlaces(6, 7, 2);
 
-    // SIAM - PARAGON (SubNode 2)
+    // SIAM - PARAGON
     addPlace(8, 2, "Entrance", 0, 0, "");
     addPlace(9, 2, "Escalator", 0, 0, "");
     addPlace(10, 2, "Gourmet", 0, 0, "");
@@ -402,14 +396,11 @@ int main() {
     addPlace(13, 2, "MK", 1, 2002, "MK");
     addPlace(14, 2, "Bonchon", 1, 2003, "Bonchon");
 
-    connectPlaces(8, 9, 2);
-    connectPlaces(9, 10, 3);
-    connectPlaces(10, 11, 1);
-    connectPlaces(11, 12, 4);
-    connectPlaces(9, 13, 4);
-    connectPlaces(13, 14, 4);
+    connectPlaces(8, 9, 2); connectPlaces(9, 10, 3);
+    connectPlaces(10, 11, 1); connectPlaces(11, 12, 4);
+    connectPlaces(9, 13, 4); connectPlaces(13, 14, 4);
 
-    // ARI - BTS (SubNode 3)
+    // ARI - BTS
     addPlace(15, 3, "Entrance", 0, 0, "");
     addPlace(16, 3, "Escalator", 0, 0, "");
     addPlace(17, 3, "After You", 1, 3001, "After You");
@@ -419,15 +410,12 @@ int main() {
     addPlace(21, 3, "Benz", 0, 0, "");
     addPlace(22, 3, "PTT", 0, 0, "");
 
-    connectPlaces(15, 16, 2);
-    connectPlaces(16, 17, 3);
-    connectPlaces(16, 18, 3);
-    connectPlaces(16, 19, 3);
-    connectPlaces(16, 20, 2);
-    connectPlaces(20, 21, 5);
+    connectPlaces(15, 16, 2); connectPlaces(16, 17, 3);
+    connectPlaces(16, 18, 3); connectPlaces(16, 19, 3);
+    connectPlaces(16, 20, 2); connectPlaces(20, 21, 5);
     connectPlaces(20, 22, 5);
 
-    // ARI - VILLA (SubNode 4)
+    // ARI - VILLA
     addPlace(23, 4, "Bts exit 1", 0, 0, "");
     addPlace(24, 4, "Thai restaurant", 0, 0, "");
     addPlace(25, 4, "starbucks", 0, 0, "");
@@ -437,16 +425,12 @@ int main() {
     addPlace(29, 4, "After You", 1, 4002, "After You");
     addPlace(30, 4, "Shabushi", 1, 4003, "Shabushi");
 
-    connectPlaces(23, 26, 2);
-    connectPlaces(26, 24, 3);
-    connectPlaces(26, 25, 1);
-    connectPlaces(26, 27, 2);
-    connectPlaces(27, 28, 2);
-    connectPlaces(27, 29, 2);
-    connectPlaces(27, 30, 2);
-    connectPlaces(20, 23, 5); // ทางเชื่อมข้ามจาก BTS Ari ไป Villa Ari
+    connectPlaces(23, 26, 2); connectPlaces(26, 24, 3);
+    connectPlaces(26, 25, 1); connectPlaces(26, 27, 2);
+    connectPlaces(27, 28, 2); connectPlaces(27, 29, 2);
+    connectPlaces(27, 30, 2); connectPlaces(20, 23, 5);
 
-    // RAMA 2 - BANGMOD (SubNode 5)
+    // RAMA 2 - BANGMOD
     addPlace(31, 5, "Entrance", 0, 0, "");
     addPlace(32, 5, "Escalator", 0, 0, "");
     addPlace(33, 5, "Red building", 0, 0, "");
@@ -456,15 +440,12 @@ int main() {
     addPlace(37, 5, "McDonald's", 1, 5002, "McDonald's");
     addPlace(38, 5, "KFC", 1, 5003, "KFC");
 
-    connectPlaces(31, 32, 2);
-    connectPlaces(32, 35, 3);
-    connectPlaces(35, 33, 1);
-    connectPlaces(35, 34, 1);
-    connectPlaces(35, 36, 1);
-    connectPlaces(35, 37, 1);
+    connectPlaces(31, 32, 2); connectPlaces(32, 35, 3);
+    connectPlaces(35, 33, 1); connectPlaces(35, 34, 1);
+    connectPlaces(35, 36, 1); connectPlaces(35, 37, 1);
     connectPlaces(35, 38, 1);
 
-    // RAMA 2 - CENTRAL (SubNode 6)
+    // RAMA 2 - CENTRAL
     addPlace(39, 6, "Entrance", 0, 0, "");
     addPlace(40, 6, "Escalator", 0, 0, "");
     addPlace(41, 6, "B2S", 0, 0, "");
@@ -474,15 +455,11 @@ int main() {
     addPlace(45, 6, "McDonald's", 1, 6002, "McDonald's");
     addPlace(46, 6, "KFC", 1, 6003, "KFC");
 
-    connectPlaces(39, 40, 2);
-    connectPlaces(40, 41, 3);
-    connectPlaces(40, 42, 5);
-    connectPlaces(40, 43, 3);
-    connectPlaces(40, 44, 2);
-    connectPlaces(40, 45, 2);
+    connectPlaces(39, 40, 2); connectPlaces(40, 41, 3);
+    connectPlaces(40, 42, 5); connectPlaces(40, 43, 3);
+    connectPlaces(40, 44, 2); connectPlaces(40, 45, 2);
     connectPlaces(40, 46, 2);
 
-    // --- เมนูหลัก ---
     int choice;
     do {
         printf("\n======= RESTAURANT SYSTEM (Integrated) =======\n");
@@ -497,41 +474,37 @@ int main() {
         if (choice == 1) {
             showAreas();
             int area = selectArea();
-
             showSubNodes(area);
             int sub = selectSubNode();
-
             showPlaces(sub);
             int start = selectStartPlace();
-
             showRestaurants(sub);
             int dest = selectRestaurant();
-
-            // ฟังก์ชันนี้จะเรียก findShortestPath เพื่อปริ้นเส้นทาง 
-            // และตามด้วย enqueue เพื่อจองคิวให้โดยอัตโนมัติ
-            processBooking(start, dest); // มีซ่อน find shortest ไส้ข้างใน
-   
+            processBooking(start, dest);
         } else if (choice == 2) {
-            printf("\nSelect Branch ID (1:Siam, 2:Ari, 3:Rama 2): ");
+            printf("\nSelect Branch (1:Siam, 2:Ari, 3:Rama 2): ");
             int b; scanf("%d", &b);
             dequeue(&queues[b-1]);
-            
         } else if (choice == 3) {
             for(int i=0; i<BRANCH_COUNT; i++) {
-                printf("\n--- %s Queue ---\n", branchNames[i]);  // FIXED: Added \n
+                printf("\n--- %s Queue ---\n", branchNames[i]);
                 QueueNode *curr = queues[i].front;
-                int count = 0;
-                if(!curr) {
-                    printf(" Empty\n");
-                } else {
-                    while(curr) {
-                        count++;
-                        printf(" [%s] %s -> %s\n", curr->data.queueCode, curr->data.name, curr->data.restaurantName);
-                        curr = curr->next;
-                    }
-                    printf(" Total: %d customer(s)\n", count);
+                if(!curr) printf(" Empty\n");
+                while(curr) {
+                    printf(" [%s] %s (ID: %d)\n", curr->data.queueCode, curr->data.name, curr->data.bookingID);
+                    curr = curr->next;
                 }
             }
+        } else if (choice == 4) {
+            printf("\nEnter Booking ID to search: ");
+            int sid; scanf("%d", &searchID);
+            Booking* found = searchHistory(historyRoot, sid);
+            if (found) printf("Found! Name: %s, Table: %d\n", found->customerName, found->tableNumber);
+            else printf("History not found.\n");
+        } else if (choice == 5) {
+            printf("\n=== Reservation History (BST) ===\n");
+            if(!historyRoot) printf("No history yet.\n");
+            else displayHistory(historyRoot);
         }
     } while (choice != 0);
 
