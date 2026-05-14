@@ -10,6 +10,16 @@
 #define INF 9999
 
 // ================= STRUCT (โครงสร้างข้อมูล) =================
+// --- ระบบ BST (History) สำหรับเก็บประวัติ ---
+struct Booking {
+    int bookingID;
+    char customerName[50];
+    int tableNumber; // จำลองเลขโต๊ะ
+    struct Booking* left;
+    struct Booking* right;
+};
+typedef struct Booking Booking;
+
 
 // QUEUE (gain) 
 #define BRANCH_COUNT 3
@@ -71,13 +81,42 @@ struct Area areas[MAX_AREA];
 struct SubNode subnodes[MAX_SUBNODE];
 struct Place places[MAX_PLACE];
 Queue queues[BRANCH_COUNT]; 
+Booking* historyRoot = NULL; // รากของ BST เก็บประวัติ
 
 int areaCount = 0;
 int subnodeCount = 0;
 int placeCount = 0;
 int graph[MAX_PLACE][MAX_PLACE];
-int nextBookingID = 1;
+int nextBookingID = 1001;
+// ================= BST FUNCTIONS (ประวัติการจอง) =================
+Booking* createBookingNode(int id, char name[], int table) {
+    Booking* newNode = (Booking*)malloc(sizeof(Booking));
+    newNode->bookingID = id;
+    strcpy(newNode->customerName, name);
+    newNode->tableNumber = table;
+    newNode->left = newNode->right = NULL;
+    return newNode;
+}
 
+Booking* insertHistory(Booking* root, int id, char name[], int table) {
+    if (root == NULL) return createBookingNode(id, name, table);
+    if (id < root->bookingID) root->left = insertHistory(root->left, id, name, table);
+    else if (id > root->bookingID) root->right = insertHistory(root->right, id, name, table);
+    return root;
+}
+
+Booking* searchHistory(Booking* root, int id) {
+    if (root == NULL || root->bookingID == id) return root;
+    if (id < root->bookingID) return searchHistory(root->left, id);
+    return searchHistory(root->right, id);
+}
+
+void displayHistory(Booking* root) {
+    if (root == NULL) return;
+    displayHistory(root->left);
+    printf("ID: %d | Name: %s | Table: %d\n", root->bookingID, root->customerName, root->tableNumber);
+    displayHistory(root->right);
+}
 // ================= QUEUE FUNCTIONS (ระบบคิว) =================
 
 void initQueue(Queue *q, int branchID) {
@@ -105,13 +144,21 @@ void enqueue(Queue *q, Customer c) {
     printf("\n>>> [QUEUED] Code: %s | Customer: %s | Restaurant: %s\n", c.queueCode, c.name, c.restaurantName);
 }
 
+// แก้ไขฟังก์ชัน dequeue ให้ลิ้งค์ข้อมูลไปเก็บใน BST History
 void dequeue(Queue *q) {
     if (q->front == NULL) {
         printf("\n[EMPTY] No customers in %s branch.\n", branchNames[q->branchID-1]);
         return;
     }
     QueueNode *temp = q->front;
-    printf("\n[SERVED] %s (%s) is now being seated at %s.\n", temp->data.name, temp->data.queueCode, temp->data.restaurantName);
+    *int tableNum = (rand() % 20) + 1; // สุ่มเลขโต๊ะ 1-20 ทำไม
+
+    printf("\n[SERVED] %s (%s) is now seated at Table %d.\n", temp->data.name, temp->data.queueCode, tableNum);
+    
+    // --- LINK: ส่งข้อมูลจาก Queue ไปยัง BST History ---
+    historyRoot = insertHistory(historyRoot, temp->data.bookingID, temp->data.name, tableNum);
+    printf("[SYSTEM] Data moved to History BST (ID: %d)\n", temp->data.bookingID);
+
     q->front = q->front->next;
     if (q->front == NULL) q->rear = NULL;
     free(temp);
@@ -272,7 +319,6 @@ int findShortestPath(int start, int destination) {
     printf("TOTAL DISTANCE : %d units\n", distance[destination]);
     printf("========================================\n");
 }
-
 // ================= INTEGRATION (ส่วนเชื่อมต่อ) =================
 
 void processBooking(int startID, int destID) {
@@ -440,10 +486,12 @@ int main() {
     // --- เมนูหลัก ---
     int choice;
     do {
-        printf("\n======= RESTAURANT QUEUE & NAVIGATION =======\n");
-        printf("1. Make Reservation & Find Path\n");
-        printf("2. Serve Next Customer (Staff)\n");
-        printf("3. View All Queues\n");
+        printf("\n======= RESTAURANT SYSTEM (Integrated) =======\n");
+        printf("1. Reservation & Find Path (Graph -> Queue)\n");
+        printf("2. Serve Next Customer (Queue -> BST History)\n");
+        printf("3. Display Current Queues\n");
+        printf("4. Search Booking History (BST Search)\n");
+        printf("5. Display All History (BST Inorder)\n");
         printf("0. Exit\n");
         printf("Select: "); scanf("%d", &choice);
 
