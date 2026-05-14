@@ -1,3 +1,4 @@
+/*
 //เดิมถ้า path not found ต้องกลับมาที่หน้าเเรก
 #include <stdio.h>
 #include <stdlib.h>
@@ -536,3 +537,4 @@ int main() {
 
     return 0;
 }
+    */
