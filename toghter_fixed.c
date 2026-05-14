@@ -316,8 +316,7 @@ void findShortestPath(int start, int destination) {
     printf("----------------------------------------\n");
     printf("TOTAL DISTANCE : %d units\n", distance[destination]);
     printf("========================================\n");
-}.
-
+}
 // ================= INTEGRATION (ส่วนเชื่อมต่อ) =================
 
 void processBooking(int startID, int destID) {
