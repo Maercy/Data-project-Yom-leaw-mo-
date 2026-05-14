@@ -1,0 +1,643 @@
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#define MAX_AREA 10
+#define MAX_SUBNODE 20
+#define MAX_PLACE 100
+#define INF 9999
+
+// ================= STRUCT =================
+
+struct Booking {
+    int bookingID;
+    char customerName[50];
+    int tableNumber;
+    struct Booking* left;
+    struct Booking* right;
+};
+
+typedef struct Booking Booking;
+
+#define BRANCH_COUNT 3
+
+const char *branchNames[BRANCH_COUNT] = {
+    "Siam",
+    "Ari",
+    "Rama 2"
+};
+
+const char branchPrefix[BRANCH_COUNT] = {
+    'S', 'A', 'R'
+};
+
+typedef struct {
+    int bookingID;
+    char queueCode[10];
+    char name[50];
+    char phone[20];
+    int partySize;
+    int branchID;
+    char subNode[50];
+    char restaurantName[50];
+} Customer;
+
+typedef struct QueueNode {
+    Customer data;
+    struct QueueNode *next;
+} QueueNode;
+
+typedef struct {
+    QueueNode *front;
+    QueueNode *rear;
+    int size;
+    int branchID;
+    int totalBooked;
+} Queue;
+
+struct Area {
+    int id;
+    char name[50];
+};
+
+struct SubNode {
+    int id;
+    int area_id;
+    char name[50];
+};
+
+struct Restaurant {
+    int restaurant_id;
+    char restaurant_name[50];
+};
+
+struct Place {
+    int id;
+    int subnode_id;
+    char place_name[50];
+    int isRestaurant;
+    struct Restaurant restaurant;
+};
+
+// ================= GLOBAL =================
+
+struct Area areas[MAX_AREA];
+struct SubNode subnodes[MAX_SUBNODE];
+struct Place places[MAX_PLACE];
+
+Queue queues[BRANCH_COUNT];
+
+Booking* historyRoot = NULL;
+
+int areaCount = 0;
+int subnodeCount = 0;
+int placeCount = 0;
+
+int graph[MAX_PLACE][MAX_PLACE];
+
+int nextBookingID = 1001;
+
+// ================= BST =================
+
+Booking* createBookingNode(int id, char name[], int table) {
+    Booking* newNode = (Booking*)malloc(sizeof(Booking));
+
+    newNode->bookingID = id;
+    strcpy(newNode->customerName, name);
+    newNode->tableNumber = table;
+
+    newNode->left = NULL;
+    newNode->right = NULL;
+
+    return newNode;
+}
+
+Booking* insertHistory(Booking* root, int id, char name[], int table) {
+
+    if(root == NULL) {
+        return createBookingNode(id, name, table);
+    }
+
+    if(id < root->bookingID) {
+        root->left = insertHistory(root->left, id, name, table);
+    }
+    else if(id > root->bookingID) {
+        root->right = insertHistory(root->right, id, name, table);
+    }
+
+    return root;
+}
+
+Booking* searchHistory(Booking* root, int id) {
+
+    if(root == NULL || root->bookingID == id) {
+        return root;
+    }
+
+    if(id < root->bookingID) {
+        return searchHistory(root->left, id);
+    }
+
+    return searchHistory(root->right, id);
+}
+
+void displayHistory(Booking* root) {
+
+    if(root == NULL) return;
+
+    displayHistory(root->left);
+
+    printf("Booking ID: %d | Name: %s | Table: %d\n",
+           root->bookingID,
+           root->customerName,
+           root->tableNumber);
+
+    printf("----------------------------------------\n");
+
+    displayHistory(root->right);
+}
+
+// ================= QUEUE =================
+
+void initQueue(Queue *q, int branchID) {
+
+    q->front = NULL;
+    q->rear = NULL;
+    q->size = 0;
+    q->branchID = branchID;
+    q->totalBooked = 0;
+}
+
+void enqueue(Queue *q, Customer c) {
+
+    QueueNode *newNode =
+        (QueueNode *)malloc(sizeof(QueueNode));
+
+    q->totalBooked++;
+
+    sprintf(c.queueCode,
+            "%c-%03d",
+            branchPrefix[q->branchID - 1],
+            q->totalBooked);
+
+    newNode->data = c;
+    newNode->next = NULL;
+
+    if(q->rear == NULL) {
+        q->front = q->rear = newNode;
+    }
+    else {
+        q->rear->next = newNode;
+        q->rear = newNode;
+    }
+
+    q->size++;
+
+    printf("\n>>> [QUEUED] Code: %s | Customer: %s | Restaurant: %s\n",
+           c.queueCode,
+           c.name,
+           c.restaurantName);
+}
+
+void dequeue(Queue *q) {
+
+    if(q->front == NULL) {
+        printf("\n[EMPTY] No customers in %s branch.\n",
+               branchNames[q->branchID - 1]);
+        return;
+    }
+
+    QueueNode *temp = q->front;
+
+    int tableNum = (rand() % 20) + 1;
+
+    printf("\n[SERVED] %s (%s) is now seated at Table %d.\n",
+           temp->data.name,
+           temp->data.queueCode,
+           tableNum);
+
+    historyRoot = insertHistory(
+        historyRoot,
+        temp->data.bookingID,
+        temp->data.name,
+        tableNum
+    );
+
+    printf("[SYSTEM] Booking history updated for ID: %d\n",
+           temp->data.bookingID);
+
+    q->front = q->front->next;
+
+    if(q->front == NULL) {
+        q->rear = NULL;
+    }
+
+    free(temp);
+
+    q->size--;
+}
+
+void displayQueues() {
+
+    for(int i = 0; i < BRANCH_COUNT; i++) {
+
+        printf("\n--- %s Queue ---\n", branchNames[i]);
+
+        QueueNode *curr = queues[i].front;
+
+        if(curr == NULL) {
+            printf("Empty\n");
+            continue;
+        }
+
+        while(curr != NULL) {
+
+            printf("[%s] %s | Party: %d | Restaurant: %s\n",
+                   curr->data.queueCode,
+                   curr->data.name,
+                   curr->data.partySize,
+                   curr->data.restaurantName);
+
+            curr = curr->next;
+        }
+    }
+}
+
+// ================= GRAPH =================
+
+void addArea(int id, char name[]) {
+
+    areas[areaCount].id = id;
+
+    strcpy(areas[areaCount].name, name);
+
+    areaCount++;
+}
+
+void addSubNode(int id, int area_id, char name[]) {
+
+    subnodes[subnodeCount].id = id;
+    subnodes[subnodeCount].area_id = area_id;
+
+    strcpy(subnodes[subnodeCount].name, name);
+
+    subnodeCount++;
+}
+
+void addPlace(
+    int id,
+    int subnode_id,
+    char place_name[],
+    int isRestaurant,
+    int restaurant_id,
+    char restaurant_name[]
+) {
+
+    places[placeCount].id = id;
+    places[placeCount].subnode_id = subnode_id;
+
+    strcpy(places[placeCount].place_name, place_name);
+
+    places[placeCount].isRestaurant = isRestaurant;
+
+    places[placeCount].restaurant.restaurant_id =
+        restaurant_id;
+
+    strcpy(
+        places[placeCount].restaurant.restaurant_name,
+        restaurant_name
+    );
+
+    placeCount++;
+}
+
+void connectPlaces(int from, int to, int dist) {
+
+    graph[from][to] = dist;
+    graph[to][from] = dist;
+}
+
+void showAreas() {
+
+    printf("\n===== AREAS =====\n");
+
+    for(int i = 0; i < areaCount; i++) {
+        printf("%d. %s\n",
+               areas[i].id,
+               areas[i].name);
+    }
+}
+
+void showSubNodes(int area_id) {
+
+    printf("\n===== SUB LOCATIONS =====\n");
+
+    for(int i = 0; i < subnodeCount; i++) {
+
+        if(subnodes[i].area_id == area_id) {
+
+            printf("%d. %s\n",
+                   subnodes[i].id,
+                   subnodes[i].name);
+        }
+    }
+}
+
+void showPlaces(int subnode_id) {
+
+    printf("\n===== PLACES =====\n");
+
+    for(int i = 0; i < placeCount; i++) {
+
+        if(places[i].subnode_id == subnode_id) {
+
+            printf("%d. %s\n",
+                   places[i].id,
+                   places[i].place_name);
+        }
+    }
+}
+
+void showRestaurants(int subnode_id) {
+
+    printf("\n===== RESTAURANTS =====\n");
+
+    for(int i = 0; i < placeCount; i++) {
+
+        if(places[i].subnode_id == subnode_id
+           && places[i].isRestaurant == 1) {
+
+            printf("%d. %s\n",
+                   places[i].id,
+                   places[i].restaurant.restaurant_name);
+        }
+    }
+}
+
+int findShortestPath(int start, int destination) {
+
+    int distance[MAX_PLACE];
+    int visited[MAX_PLACE];
+    int parent[MAX_PLACE];
+
+    for(int i = 0; i < MAX_PLACE; i++) {
+
+        distance[i] = INF;
+        visited[i] = 0;
+        parent[i] = -1;
+    }
+
+    distance[start] = 0;
+
+    for(int count = 0;
+        count < MAX_PLACE - 1;
+        count++) {
+
+        int min = INF;
+        int u = -1;
+
+        for(int i = 0; i < MAX_PLACE; i++) {
+
+            if(!visited[i] &&
+               distance[i] <= min) {
+
+                min = distance[i];
+                u = i;
+            }
+        }
+
+        if(u == -1) break;
+
+        visited[u] = 1;
+
+        for(int v = 0; v < MAX_PLACE; v++) {
+
+            if(!visited[v]
+               && graph[u][v] > 0
+               && distance[u] + graph[u][v]
+               < distance[v]) {
+
+                distance[v] =
+                    distance[u] + graph[u][v];
+
+                parent[v] = u;
+            }
+        }
+    }
+
+    if(distance[destination] >= INF) {
+        printf("\nNo path found!\n");
+        return 0;
+    }
+
+    printf("\n===== NAVIGATION =====\n");
+
+    int path[MAX_PLACE];
+    int path_count = 0;
+    int curr = destination;
+
+    while(curr != -1) {
+
+        path[path_count++] = curr;
+        curr = parent[curr];
+    }
+
+    for(int i = path_count - 1; i >= 0; i--) {
+
+        printf("%s",
+               places[path[i]].place_name);
+
+        if(i > 0) {
+            printf(" -> ");
+        }
+    }
+
+    printf("\nTotal Distance: %d\n",
+           distance[destination]);
+
+    return 1;
+}
+
+// ================= PROCESS =================
+
+void processBooking(int startID, int destID) {
+
+    if(startID < 0 || startID >= placeCount ||
+       destID < 0 || destID >= placeCount) {
+
+        printf("Invalid place selection.\n");
+        return;
+    }
+
+    Customer c;
+
+    c.bookingID = nextBookingID++;
+
+    if(!findShortestPath(startID, destID)) {
+        return;
+    }
+
+    printf("\n--- Customer Registration ---\n");
+
+    printf("Enter Name: ");
+    scanf(" %[^\n]", c.name);
+
+    printf("Enter Phone: ");
+    scanf("%s", c.phone);
+
+    printf("Party Size: ");
+    scanf("%d", &c.partySize);
+
+    int subID = places[destID].subnode_id;
+
+    int areaID = -1;
+
+    for(int i = 0; i < subnodeCount; i++) {
+
+        if(subnodes[i].id == subID) {
+
+            areaID = subnodes[i].area_id;
+
+            strcpy(c.subNode,
+                   subnodes[i].name);
+
+            break;
+        }
+    }
+
+    if(areaID == -1) {
+        printf("Area not found.\n");
+        return;
+    }
+
+    c.branchID = areaID;
+
+    strcpy(
+        c.restaurantName,
+        places[destID].restaurant.restaurant_name
+    );
+
+    enqueue(&queues[areaID - 1], c);
+}
+
+// ================= MAIN =================
+
+int main() {
+
+#ifdef _WIN32
+    SetConsoleOutputCP(65001);
+#endif
+
+    srand(time(NULL));
+
+    for(int i = 0; i < BRANCH_COUNT; i++) {
+        initQueue(&queues[i], i + 1);
+    }
+
+    for(int i = 0; i < MAX_PLACE; i++) {
+        for(int j = 0; j < MAX_PLACE; j++) {
+            graph[i][j] = 0;
+        }
+    }
+
+    // ===== DATA =====
+
+    addArea(1, "Siam");
+    addArea(2, "Ari");
+    addArea(3, "Rama 2");
+
+    addSubNode(1, 1, "MBK");
+    addSubNode(2, 1, "PARAGON");
+
+    // เพิ่มข้อมูลต่อจากของเดิมได้เลย
+
+    int choice;
+
+    do {
+
+        printf("\n======= RESTAURANT SYSTEM =======\n");
+
+        printf("1. Reservation & Find Path\n");
+        printf("2. Serve Next Customer\n");
+        printf("3. Display Current Queues\n");
+        printf("4. Search Booking History\n");
+        printf("5. Display All History\n");
+        printf("0. Exit\n");
+
+        printf("Select: ");
+        scanf("%d", &choice);
+
+        if(choice == 1) {
+
+            int start, dest;
+
+            printf("Enter Start Place ID: ");
+            scanf("%d", &start);
+
+            printf("Enter Destination Restaurant ID: ");
+            scanf("%d", &dest);
+
+            processBooking(start, dest);
+        }
+
+        else if(choice == 2) {
+
+            int b;
+
+            printf("Select Branch (1:Siam,2:Ari,3:Rama2): ");
+            scanf("%d", &b);
+
+            if(b < 1 || b > BRANCH_COUNT) {
+                printf("Invalid branch.\n");
+            }
+            else {
+                dequeue(&queues[b - 1]);
+            }
+        }
+
+        else if(choice == 3) {
+
+            displayQueues();
+        }
+
+        else if(choice == 4) {
+
+            int sid;
+
+            printf("Enter Booking ID: ");
+            scanf("%d", &sid);
+
+            Booking* found =
+                searchHistory(historyRoot, sid);
+
+            if(found) {
+
+                printf("Found! Name: %s | Table: %d\n",
+                       found->customerName,
+                       found->tableNumber);
+            }
+            else {
+                printf("History not found.\n");
+            }
+        }
+
+        else if(choice == 5) {
+
+            if(historyRoot == NULL) {
+                printf("No history yet.\n");
+            }
+            else {
+                displayHistory(historyRoot);
+            }
+        }
+
+    } while(choice != 0);
+
+    return 0;
+}
