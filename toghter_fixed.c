@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <windows.h>
+//#include <windows.h>// อันนี้
 
 #define MAX_AREA 10
 #define MAX_SUBNODE 20
@@ -213,12 +213,14 @@ int selectRestaurant() {
 }
 
 
-void findShortestPath(int start, int destination) {
+int findShortestPath(int start, int destination) {
+
     int distance[MAX_PLACE], visited[MAX_PLACE], parent[MAX_PLACE];
-    for (int i = 0; i < MAX_PLACE; i++) { 
-        distance[i] = INF; 
-        visited[i] = 0; 
-        parent[i] = -1; 
+
+    for (int i = 0; i < MAX_PLACE; i++) {
+        distance[i] = INF;
+        visited[i] = 0;
+        parent[i] = -1;
     }
     distance[start] = 0;
 
@@ -306,7 +308,7 @@ void processBooking(int startID, int destID) {
 // ================= MAIN =================
 
 int main() {
-    SetConsoleOutputCP(65001);
+   SetConsoleOutputCP(65001);
     
     // ล้างค่าคิวและกราฟ
     for (int i = 0; i < BRANCH_COUNT; i++) initQueue(&queues[i], i + 1);
