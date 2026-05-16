@@ -39,7 +39,12 @@ const char branchPrefix[BRANCH_COUNT] = {
     'A',
     'R'
 };
-
+// Customer Information Stored
+/* example:
+Booking ID : 1001
+Queue Code : S-001
+Name : John
+Restaurant : MK */
 typedef struct {
     int bookingID;
     char queueCode[10];
@@ -49,19 +54,22 @@ typedef struct {
     int branchID;
     char subNode[50];
     char restaurantName[50];
-} Customer;
+} Customer; 
 
+/* Used to create a node in a linked-list queue.
+Each node stores customer information and a pointer to the next customer
+like who next from customer data*/
 typedef struct QueueNode {
     Customer data;
     struct QueueNode *next;
 } QueueNode;
-
+// Stores information for managing the queue
 typedef struct {
-    QueueNode *front;
-    QueueNode *rear;
-    int size;
-    int branchID;
-    int totalBooked;
+    QueueNode *front; // points to the first customer in the queue
+    QueueNode *rear; //points to the last customer in the queue
+    int size; //stores total customers currently waiting
+    int branchID; //identifies which branch the queue belongs to
+    int totalBooked; //counts all reservations and generates queue codes
 } Queue;
 
 // GRAPH
@@ -95,7 +103,7 @@ struct Area areas[MAX_AREA];
 struct SubNode subnodes[MAX_SUBNODE];
 struct Place places[MAX_PLACE];
 
-Queue queues[BRANCH_COUNT];
+Queue queues[BRANCH_COUNT]; //Creates separate queues for each branch
 
 Booking* historyRoot = NULL;
 
@@ -172,16 +180,16 @@ void displayHistory(Booking* root) {
 
 // ================= QUEUE FUNCTIONS =================
 
-void initQueue(Queue *q, int branchID) {
+void initQueue(Queue *q, int branchID) { //start queue
 
     q->front = NULL;
     q->rear = NULL;
     q->size = 0;
-    q->branchID = branchID;
+    q->branchID = branchID; 
     q->totalBooked = 0;
 }
 
-void enqueue(Queue *q, Customer c) {
+void enqueue(Queue *q, Customer c) { // add customer to the queue
 
     QueueNode *newNode = (QueueNode *)malloc(sizeof(QueueNode));
 
@@ -211,9 +219,9 @@ void enqueue(Queue *q, Customer c) {
            c.restaurantName);
 }
 
-void dequeue(Queue *q) {
+void dequeue(Queue *q) { // serve! first queue
 
-    if (q->front == NULL) {
+    if (q->front == NULL) { // available?
 
         printf("\n[EMPTY] No customers in %s branch.\n",
                branchNames[q->branchID - 1]);
@@ -221,7 +229,7 @@ void dequeue(Queue *q) {
         return;
     }
 
-    QueueNode *temp = q->front;
+    QueueNode *temp = q->front; // temp. store before remove after serve fist
 
     int tableNum = (rand() % 20) + 1;
 
