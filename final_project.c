@@ -65,11 +65,11 @@ typedef struct QueueNode {
 } QueueNode;
 // Stores information for managing the queue
 typedef struct {
-    QueueNode *front; // points to the first customer in the queue
-    QueueNode *rear; //points to the last customer in the queue
-    int size; //stores total customers currently waiting
-    int branchID; //identifies which branch the queue belongs to
-    int totalBooked; //counts all reservations and generates queue codes
+    QueueNode *front; 
+    QueueNode *rear; 
+    int size; 
+    int branchID; 
+    int totalBooked; 
 } Queue;
 
 // GRAPH
