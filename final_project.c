@@ -13,9 +13,9 @@
 #define MAX_PLACE 100
 #define INF 9999
 
-// ================= STRUCT (โครงสร้างข้อมูล) =================
+// ================= DATA STRUCT =================
 
-// --- ระบบ BST (History) สำหรับเก็บประวัติ ---
+// --- BST (History) system For keeping history ---
 struct Booking {
     int bookingID;
     char customerName[50];
