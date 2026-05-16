@@ -25,7 +25,7 @@ struct Booking {
 };
 typedef struct Booking Booking;
 
-// QUEUE
+// QUEUE (total 3 branch)
 #define BRANCH_COUNT 3
 
 const char *branchNames[BRANCH_COUNT] = {
@@ -39,7 +39,7 @@ const char branchPrefix[BRANCH_COUNT] = {
     'A',
     'R'
 };
-
+// stores customer data
 typedef struct {
     int bookingID;
     char queueCode[10];
@@ -50,18 +50,18 @@ typedef struct {
     char subNode[50];
     char restaurantName[50];
 } Customer;
-
+// Create a node for a Linked List Queue
 typedef struct QueueNode {
     Customer data;
     struct QueueNode *next;
 } QueueNode;
-
+// stores data of all queues
 typedef struct {
-    QueueNode *front; // points to the first customer in the queue
-    QueueNode *rear; //points to the last customer in the queue
-    int size; //stores total customers currently waiting
-    int branchID; //identifies which branch the queue belongs to
-    int totalBooked; //counts all reservations and generates queue codes
+    QueueNode *front; 
+    QueueNode *rear; 
+    int size; 
+    int branchID; 
+    int totalBooked;
 } Queue;
 
 // GRAPH
@@ -172,7 +172,7 @@ void displayHistory(Booking* root) {
 
 // ================= QUEUE FUNCTIONS =================
 
-void initQueue(Queue *q, int branchID) {
+void initQueue(Queue *q, int branchID) { //start queue = no queue
 
     q->front = NULL;
     q->rear = NULL;
@@ -181,7 +181,7 @@ void initQueue(Queue *q, int branchID) {
     q->totalBooked = 0;
 }
 
-void enqueue(Queue *q, Customer c) {
+void enqueue(Queue *q, Customer c) { // add new customers to the end of the queue
 
     QueueNode *newNode = (QueueNode *)malloc(sizeof(QueueNode));
 
@@ -211,7 +211,7 @@ void enqueue(Queue *q, Customer c) {
            c.restaurantName);
 }
 
-void dequeue(Queue *q) {
+void dequeue(Queue *q) { // call the first customer in for service
 
     if (q->front == NULL) {
 
