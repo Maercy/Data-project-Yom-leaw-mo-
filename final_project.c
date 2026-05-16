@@ -172,7 +172,7 @@ void displayHistory(Booking* root) {
 
 // ================= QUEUE FUNCTIONS =================
 
-void initQueue(Queue *q, int branchID) { //start queue = no queue
+void initQueue(Queue *q, int branchID) { //start queue = no queue or set zero
 
     q->front = NULL;
     q->rear = NULL;
