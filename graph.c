@@ -1,4 +1,3 @@
-//เหลือเเก้ค่าในกราฟให้เชื่อมกัน
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>
@@ -47,7 +46,7 @@ int areaCount = 0;
 int subnodeCount = 0;
 int placeCount = 0;
 
-// ================= GRAPH (เมทริกซ์เก็บเส้นเชื่อม) =================
+// ================= metrix for connecting node เก็บค่าระยะทาง (Weight) ระหว่างจุด from ไปยังจุด to=================
 
 int graph[MAX_PLACE][MAX_PLACE];
 
@@ -82,21 +81,19 @@ void addPlace(int id, int subnode_id, char place_name[], int isRestaurant, int r
     placeCount++;
 }
 
-// ฟังก์ชันเชื่อมจุดสองจุดเข้าด้วยกันพร้อมระบุระยะทาง
+// ฟังก์ชันเชื่อมจุดสองจุดเข้าด้วยกันพร้อมระบุระยะทาง make undurected graph allow user walk go and back
 void connectPlaces(int from, int to, int distance) {
     graph[from][to] = distance;
     graph[to][from] = distance;
 }
 
 // ================= SHOW FUNCTIONS (ฟังก์ชันแสดงผลเมนู) =================
-
 void showAreas() {
     printf("\n===== AREAS  =====\n");
     for(int i = 0; i < areaCount; i++) {
         printf("%d. %s\n", areas[i].id, areas[i].name);
     }
 }
-
 void showSubNodes(int area_id) {
     printf("\n===== SUB LOCATIONS  =====\n");
     for(int i = 0; i < subnodeCount; i++) {
@@ -105,7 +102,6 @@ void showSubNodes(int area_id) {
         }
     }
 }
-
 void showPlaces(int subnode_id) {
     printf("\n===== PLACES (current place) =====\n");
     for(int i = 0; i < placeCount; i++) {
@@ -114,7 +110,6 @@ void showPlaces(int subnode_id) {
         }
     }
 }
-
 void showRestaurants(int subnode_id) {
     printf("\n===== RESTAURANTS  =====\n");
     for(int i = 0; i < placeCount; i++) {
@@ -329,41 +324,90 @@ int main() {
     addPlace(46, 6, "KFC", 1, 6003, "KFC");
 
     // 5. สร้างเส้นเชื่อม (Graph Connections)
-    // MBK
-    connectPlaces(0, 1, 2); connectPlaces(1, 2, 1);
-    connectPlaces(1, 3, 3); connectPlaces(1, 6, 4);
-    connectPlaces(6, 4, 2); connectPlaces(6, 5, 2);
-    connectPlaces(6, 7, 2);
+    // ================= 5. สร้างเส้นเชื่อม (Graph Connections) =================
+    
+    // 1. MBK (Complex Alternative Paths)
+    connectPlaces(0, 1, 2);  // Entrance (0) <-> Escalator (1)
+    connectPlaces(1, 6, 4); 
+    connectPlaces(6, 4, 2); 
+    connectPlaces(6, 5, 2);  
+    connectPlaces(6, 7, 2);  
+    // [Shortcuts]
+    connectPlaces(0, 2, 7);  
+    connectPlaces(1, 2, 1);  
+    connectPlaces(2, 6, 2);  
+    connectPlaces(2, 4, 2);  
+    connectPlaces(0, 3, 6);  
+    connectPlaces(1, 3, 3);  
+    connectPlaces(3, 5, 5);  
+    connectPlaces(3, 4, 5);  
+    connectPlaces(5, 4, 2);  
 
-    // PARAGON
-    connectPlaces(8, 9, 2); connectPlaces(9, 10, 3);
-    connectPlaces(10, 11, 1); connectPlaces(11, 12, 4);
-    connectPlaces(9, 13, 4); connectPlaces(13, 14, 4);
+    // 2. PARAGON (Complex Alternative Paths)
+    connectPlaces(8, 9, 2);  
+    connectPlaces(9, 10, 3); 
+    connectPlaces(10, 11, 1);
+    connectPlaces(11, 12, 4);
+    connectPlaces(9, 13, 4); 
+    connectPlaces(13, 14, 4);
+    // [Shortcuts & Cross Links]
+    connectPlaces(8, 10, 5); 
+    connectPlaces(10, 13, 2);
+    connectPlaces(11, 14, 3);
+    // 3. BTS Ari (Complex Alternative Paths)
+    connectPlaces(15, 16, 2); 
+    connectPlaces(16, 17, 3); 
+    connectPlaces(16, 18, 3); 
+    connectPlaces(16, 19, 3); 
+    connectPlaces(16, 20, 2); 
+    connectPlaces(20, 21, 5);
+    connectPlaces(20, 22, 5); 
+    // [Shortcuts & Station Alleys]
+    connectPlaces(15, 17, 4); 
+    connectPlaces(17, 18, 2); 
+    connectPlaces(18, 19, 2);
+    connectPlaces(19, 20, 2); 
 
-    // BTS Ari
-    connectPlaces(15, 16, 2); connectPlaces(16, 17, 3);
-    connectPlaces(16, 18, 3); connectPlaces(16, 19, 3);
-    connectPlaces(16, 20, 2); connectPlaces(20, 21, 5);
-    connectPlaces(20, 22, 5);
-
-    // Villa Ari
-    connectPlaces(23, 26, 2); connectPlaces(26, 24, 3);
-    connectPlaces(26, 25, 1); connectPlaces(26, 27, 2);
-    connectPlaces(27, 28, 2); connectPlaces(27, 29, 2);
+    // 4. Villa Ari (Complex Alternative Paths)
+    connectPlaces(23, 26, 2); 
+    connectPlaces(26, 24, 3); 
+    connectPlaces(26, 25, 1); 
+    connectPlaces(26, 27, 2); 
+    connectPlaces(27, 28, 2); 
+    connectPlaces(27, 29, 2);
     connectPlaces(27, 30, 2);
-    connectPlaces(20, 23, 5); // ทางเชื่อมข้ามจาก BTS Ari ไป Villa Ari
+    // [Shortcuts & Open Plaza Connections]
+    connectPlaces(23, 24, 4);
+    connectPlaces(24, 28, 3);
+    connectPlaces(25, 29, 2); 
+    // Inter-Building Connection
+    connectPlaces(20, 23, 5); 
 
-    // Bangmod
-    connectPlaces(31, 32, 2); connectPlaces(32, 35, 3);
-    connectPlaces(35, 33, 1); connectPlaces(35, 34, 1);
-    connectPlaces(35, 36, 1); connectPlaces(35, 37, 1);
-    connectPlaces(35, 38, 1);
+    // 5. Bangmod (Complex Alternative Paths)
+    connectPlaces(31, 32, 2); 
+    connectPlaces(32, 35, 3); 
+    connectPlaces(35, 33, 1);
+    connectPlaces(35, 34, 1); 
+    connectPlaces(35, 36, 1); 
+    connectPlaces(35, 37, 1);
+    connectPlaces(35, 38, 1); 
+    // [Shortcuts & Campus Walkways]
+    connectPlaces(31, 33, 3); 
+    connectPlaces(33, 34, 1); 
+    connectPlaces(34, 36, 2); 
 
-    // Central Pharam2
-    connectPlaces(39, 40, 2); connectPlaces(40, 41, 3);
-    connectPlaces(40, 42, 5); connectPlaces(40, 43, 3);
-    connectPlaces(40, 44, 2); connectPlaces(40, 45, 2);
-    connectPlaces(40, 46, 2);
+    // 6. Central Pharam2 (Complex Alternative Paths)
+    connectPlaces(39, 40, 2); 
+    connectPlaces(40, 41, 3); 
+    connectPlaces(40, 42, 5); 
+    connectPlaces(40, 43, 3); 
+    connectPlaces(40, 44, 2); 
+    connectPlaces(40, 45, 2); 
+    connectPlaces(40, 46, 2); 
+    // [Shortcuts & Department Store Links]
+    connectPlaces(39, 41, 4); 
+    connectPlaces(41, 44, 3); 
+    connectPlaces(43, 46, 2); 
 
     // 6. ส่วนการรันระบบ (System Flow)
     showAreas();
