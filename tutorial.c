@@ -50,7 +50,7 @@ int placeCount = 0;
 
 int graph[MAX_PLACE][MAX_PLACE];
 
-// ================= 1.FUNCTIONS Data Ingestion (ฟังก์ชันจัดการข้อมูล) =================
+// ================= FUNCTIONS Data Ingestion (ฟังก์ชันจัดการข้อมูล) =================
 
 // ฟังก์ชันเพิ่มพื้นที่หลัก (เช่น Siam, Ari)
 void addArea(int id, char name[]) {
@@ -87,7 +87,7 @@ void connectPlaces(int from, int to, int distance) {
     graph[to][from] = distance;
 }
 
-// ================= 2.SHOW FUNCTIONS (ฟังก์ชันแสดงผลเมนู) =================
+// ================= SHOW FUNCTIONS (ฟังก์ชันแสดงผลเมนู) =================
 void showAreas() {
     printf("\n===== AREAS  =====\n");
     for(int i = 0; i < areaCount; i++) {
@@ -119,7 +119,7 @@ void showRestaurants(int subnode_id) {
     }
 }
 
-// ================= 3.INPUT FUNCTIONS (ฟังก์ชันรับค่าจาก User) =================
+// ================= INPUT FUNCTIONS (ฟังก์ชันรับค่าจาก User) =================
 
 int selectArea() {
     int area;
@@ -149,7 +149,7 @@ int selectRestaurant() {
     return restaurant;
 }
 
-// ================= 4.DIJKSTRA (find the shortest path) =================
+// ================= DIJKSTRA (find the shortest path) =================
 
 void findShortestPath(int start, int destination) {
     int distance[MAX_PLACE];
@@ -158,9 +158,9 @@ void findShortestPath(int start, int destination) {
 
     // 1. Initialize (ตั้งค่าเริ่มต้น)
     for(int i = 0; i < MAX_PLACE; i++) {
-        distance[i] = INF;
-        visited[i] = 0;
-        parent[i] = -1; 
+        distance[i] = INF; // สมมติว่าทุกจุดยังไปไม่ถึง มีระยะทางเป็นอนันต์ (9999)
+        visited[i] = 0; // ตั้งค่าให้ทุกจุดเป็น 0 หมายถึงยังไม่ได้เดินไปเยือน
+        parent[i] = -1; // ตั้งค่าโหนดผู้ให้กำเนิดเริ่มต้นเป็น -1 (ยังไม่มีประวัติการเดิน)
     }
     distance[start] = 0;
 
@@ -168,19 +168,21 @@ void findShortestPath(int start, int destination) {
     for(int count = 0; count < placeCount - 1; count++) {
         int min = INF;
         int u = -1;
-//didn't visit before
+
+       // ลูปย่อยที่ 1: เลือกโหนดที่ใกล้ที่สุดที่ยังไม่ได้ไป (Greedy Approach)
         for(int i = 0; i < placeCount; i++) {
             if(!visited[i] && distance[i] <= min) {
                 min = distance[i];
-                u = i;
+                u = i; // บันทึกว่าโหนด 'u' คือจุดที่ระยะทางรวมสั้นที่สุดในรอบนี้
             }
         }
 
         if (u == -1) break; 
         visited[u] = 1;
-// revise find the new shortest path
+//เมื่อยืนที่โหนด `u` แล้ว โปรแกรมจะมองหาโหนดรอบข้าง (โหนด `v`) ที่มีเส้นเชื่อมถึงกันจริง (`graph[u][v] > 0`) 
+//หากระบบตรวจพบว่า **"ระยะทางสะสมเดิมที่ u + ทางเดินต่อไปยัง v"** มีค่าน้อยกว่า ระยะทางที่เคยบันทึกไว้ใน `distance[v]` ระบบจะทำการแทนที่ด้วยค่าใหม่ที่สั้นกว่าทันที และบันทึกรหัสของ `u` ลงในอาเรย์ `parent[v]` เพื่อเก็บประวัติการเดินทาง
         for(int v = 0; v < placeCount; v++) {
-            // checck graph connected (graph[u][v] > 0) and update if find the shorter way
+            // เช็คว่ามีการเชื่อมต่อกัน (graph[u][v] > 0) และระยะทางใหม่สั้นกว่าเดิมไหม
             if(!visited[v] && graph[u][v] > 0 && distance[u] + graph[u][v] < distance[v]) {
                 distance[v] = distance[u] + graph[u][v];
                 parent[v] = u; 
@@ -197,29 +199,30 @@ void findShortestPath(int start, int destination) {
         printf("Error: Cannot find a path to this destination.\n");
         return;
     }
-
+//ขั้นตอนที่ 3: การย้อนรอยและแสดงผลคู่มือนำทาง (Backtracking & Output)
+//หากคำนวณเสร็จแล้วพบว่า `distance[destination] >= INF` แสดงว่ากราฟขาดออกจากกัน ไม่มีทางเดินไปถึง จะแจ้ง Error ทันที แต่ถ้าไปถึงได้ ลอจิกการย้อนรอยจะทำงานดังนี้:
     // สร้าง Array ย้อนรอยเส้นทางจาก parent
     int path[MAX_PLACE];
     int path_count = 0;
     int current = destination;
 
     while (current != -1) {
-        path[path_count++] = current;
-        current = parent[current];
+        path[path_count++] = current;// เก็บตำแหน่งปัจจุบันลงอาเรย์เส้นทาง
+        current = parent[current];//กระโดดข้ามย้อนกลับไปหาโหนดแม่ของมัน
     }
 
     printf("START FROM: %s\n", places[start].place_name);
     printf("----------------------------------------\n");
 
     // ptint step by step direction
-    for (int i = path_count - 1; i >= 0; i--) { // backward
-        int nodeId = path[i]; // current place id
+    for (int i = path_count - 1; i >= 0; i--) {
+        int nodeId = path[i];
         printf("Step %d: %s", (path_count - i), places[nodeId].place_name);
         
-        if (i > 0) { // ยังไม่ถึงใช่มั้ย ต้องเดินต่อ
-            int nextId = path[i-1]; // nextplac id
+        if (i > 0) {
+            int nextId = path[i-1];
             printf("  ->  Next: %s (dist: %d)\n", places[nextId].place_name, graph[nodeId][nextId]);
-        } else { // don]t have next station
+        } else {
             printf("   [ARRIVED] 🏁\n");
         }
     }
@@ -229,7 +232,7 @@ void findShortestPath(int start, int destination) {
     printf("========================================\n");
 }
 
-// ================= 5.SEND DATA (ส่งข้อมูลไปยังระบบอื่น) =================
+// ================= SEND DATA (ส่งข้อมูลไปยังระบบอื่น) =================
 
 void sendRestaurantID(int place_id){
     for(int i = 0; i < placeCount; i++) {
@@ -323,7 +326,7 @@ int main() {
     addPlace(45, 6, "McDonald's", 1, 6002, "McDonald's");
     addPlace(46, 6, "KFC", 1, 6003, "KFC");
 
-    // 5. Graph Connections
+    // 5. สร้างเส้นเชื่อม (Graph Connections)
     // 1. MBK (Complex Alternative Paths)
     connectPlaces(0, 1, 2);  // Entrance (0) <-> Escalator (1)
     connectPlaces(1, 6, 4); 

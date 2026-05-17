@@ -602,13 +602,13 @@ int main() {
     addPlace(6, 1, "FoodCourt", 0, 0, "");
     addPlace(7, 1, "Bonchon", 1, 1003, "Bonchon");
 
-    // 1. MBK (Complex Alternative Paths)
+   
     connectPlaces(0, 1, 2);  // Entrance (0) <-> Escalator (1)
     connectPlaces(1, 6, 4); 
     connectPlaces(6, 4, 2); 
     connectPlaces(6, 5, 2);  
     connectPlaces(6, 7, 2);  
-    // [Shortcuts]
+    
     connectPlaces(0, 2, 7);  
     connectPlaces(1, 2, 1);  
     connectPlaces(2, 6, 2);  
@@ -628,14 +628,14 @@ int main() {
     addPlace(12, 2, "Yayoi", 1, 2001, "Yayoi");
     addPlace(13, 2, "MK", 1, 2002, "MK");
     addPlace(14, 2, "Bonchon", 1, 2003, "Bonchon");
-  // 2. PARAGON (Complex Alternative Paths)
+  
     connectPlaces(8, 9, 2);  
     connectPlaces(9, 10, 3); 
     connectPlaces(10, 11, 1);
     connectPlaces(11, 12, 4);
     connectPlaces(9, 13, 4); 
     connectPlaces(13, 14, 4);
-    // [Shortcuts & Cross Links]
+    
     connectPlaces(8, 10, 5); 
     connectPlaces(10, 13, 2);
     connectPlaces(11, 14, 3);
@@ -650,7 +650,7 @@ int main() {
     addPlace(21, 3, "Benz", 0, 0, "");
     addPlace(22, 3, "PTT", 0, 0, "");
 
-   // 3. BTS Ari (Complex Alternative Paths)
+   
     connectPlaces(15, 16, 2); 
     connectPlaces(16, 17, 3); 
     connectPlaces(16, 18, 3); 
@@ -658,7 +658,7 @@ int main() {
     connectPlaces(16, 20, 2); 
     connectPlaces(20, 21, 5);
     connectPlaces(20, 22, 5); 
-    // [Shortcuts & Station Alleys]
+    
     connectPlaces(15, 17, 4); 
     connectPlaces(17, 18, 2); 
     connectPlaces(18, 19, 2);
@@ -673,7 +673,7 @@ int main() {
     addPlace(28, 4, "Somtum", 1, 4001, "Somtum");
     addPlace(29, 4, "After You", 1, 4002, "After You");
     addPlace(30, 4, "Shabushi", 1, 4003, "Shabushi");
-   // 4. Villa Ari (Complex Alternative Paths)
+  
     connectPlaces(23, 26, 2); 
     connectPlaces(26, 24, 3); 
     connectPlaces(26, 25, 1); 
@@ -681,11 +681,11 @@ int main() {
     connectPlaces(27, 28, 2); 
     connectPlaces(27, 29, 2);
     connectPlaces(27, 30, 2);
-    // [Shortcuts & Open Plaza Connections]
+    
     connectPlaces(23, 24, 4);
     connectPlaces(24, 28, 3);
     connectPlaces(25, 29, 2); 
-    // Inter-Building Connection
+
     connectPlaces(20, 23, 5); 
 
     // Bangmod Connections
@@ -705,7 +705,7 @@ int main() {
     connectPlaces(35, 36, 1); 
     connectPlaces(35, 37, 1);
     connectPlaces(35, 38, 1); 
-    // [Shortcuts & Campus Walkways]
+    
     connectPlaces(31, 33, 3); 
     connectPlaces(33, 34, 1); 
     connectPlaces(34, 36, 2); 
@@ -727,7 +727,7 @@ int main() {
     connectPlaces(40, 44, 2); 
     connectPlaces(40, 45, 2); 
     connectPlaces(40, 46, 2); 
-    // [Shortcuts & Department Store Links]
+    
     connectPlaces(39, 41, 4); 
     connectPlaces(41, 44, 3); 
     connectPlaces(43, 46, 2); 
